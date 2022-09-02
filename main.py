@@ -24,8 +24,8 @@ async def on_ready():
 
 @bot.command()
 async def search(ctx, *, song):
-    song = genius.search_song(song)
     await ctx.send("Searching for lyrics...")
+    song = genius.search_song(song)
     embed = discord.Embed(title=song.title, description=song.artist, color=0x00ff00)
     embed.add_field(name="Lyrics", value=song.lyrics[:1024])
 
@@ -36,11 +36,16 @@ async def search(ctx, *, song):
 
 @bot.command()
 async def artist(ctx, *, singer):
-    artist = genius.search_artist(singer, max_songs=3)
-    embed = discord.Embed(title=artist.name, color=0x00ff00)
-    embed.add_field(name="descriptions", value="nothing")
-    embed.set_image(url=artist.image_url)
-    await ctx.channel.send(embed=embed)
+    await ctx.send("Searching for the artist and getting data. This may take up to 30 seconds...")
+    try:
+        artist = genius.search_artist(singer, max_songs=3)
+        embed = discord.Embed(title=artist.name, url=artist.url, color=0x00ff00)
+
+        embed.add_field(name="Top 3 Songs", value=artist.songs[0].title + "\n" + artist.songs[1].title + "\n" + artist.songs[2].title)
+        embed.set_image(url=artist.image_url)
+        await ctx.channel.send(embed=embed)
+    except TypeError:
+        await ctx.channel.send("Something went wrong with the response. Try another artist or try again later.")
 
 
 @bot.command()
